@@ -193,11 +193,11 @@ function getDosageInstruction(rx) {
 
 var get_medications = function(){
   return $.Deferred(function(dfd){
-    smart.patient.api.fetchAll({type: "MedicationOrder"}).then(function(rxs){
+    smart.patient.api.fetchAll({type: "MedicationRequest"}).then(function(rxs){
       _(rxs).each(function(rx){
         pt.meds_arr.push([
-          new XDate(getPath(rx, "dosageInstruction.dosageInstruction.0.timing.repeat.boundsPeriod.start") || "1800-01-01").valueOf(),
-          rx.medicationCodeableConcept.coding[0].display,
+          new XDate(getPath(rx, "dispenseRequest.validityPeriod.start") || "1800-01-01").valueOf(),
+          rx.medicationReference.display,
           getDosageInstruction(rx)
         ])
       })
@@ -211,7 +211,7 @@ var get_demographics = function(){
   return $.Deferred(function(dfd){
     patient.read().then(function(patient){
       pt.given_name = patient.name[0].given.join(" ");
-      pt.family_name = patient.name[0].family.join(" ");
+      pt.family_name = patient.name[0].family;
       pt.gender = patient.gender;
       pt.bday = patient.birthDate;
       pt.mrn = patient.identifier[0].value;
@@ -224,7 +224,7 @@ var get_vital_sign_sets = function(){
   return $.Deferred(function(dfd){
    
     results = [];
-    var vitals = smart.patient.api.fetchAll({type: "Observation", query: {code: {$or: ['8480-6','8462-4','8302-2','3141-9','55284-4']}}});
+    var vitals = smart.patient.api.fetchAll({type: "Observation", query: {code: {$or: ['8480-6','8462-4','8302-2','3141-9','55284-4', '29463-7']}}});
 
     vitals.then(function(results){
       var vitalsByCode = smart.byCode(results, 'code');
@@ -273,10 +273,10 @@ var get_vital_sign_sets = function(){
 
       });
 
-      pt.weight_arr = _(vitalsByCode["3141-9"]||[]).chain()
+      pt.weight_arr = _(vitalsByCode["29463-7"]||[]).chain()
         .map(function(v){
           return [
-            new XDate(v.effectiveDateTime).valueOf(),
+            new XDate(v.effectivePeriod.start).valueOf(),
             smart.units.kg(v.valueQuantity),
             "kg"
           ];
@@ -288,7 +288,7 @@ var get_vital_sign_sets = function(){
       pt.height_arr = _(vitalsByCode["8302-2"]||[]).chain()
         .map(function(v){
           return [
-            new XDate(v.effectiveDateTime).valueOf(),
+            new XDate(v.effectivePeriod.start).valueOf(),
             smart.units.cm(v.valueQuantity)/100.0,
             "m"
           ];
