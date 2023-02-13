@@ -229,32 +229,23 @@ var get_vital_sign_sets = function(){
     vitals.then(function(results){
       var vitalsByCode = smart.byCode(results, 'code');
 
-      (vitalsByCode['55284-4']||[]).forEach(function(bp){
-      
-        var components = bp.component;
+      pt.sbp_arr = _(vitalsByCode["8480-6"]||[]).chain()
+          .map(function(v){
+            return [
+              new XDate(v.effectivePeriod.start).valueOf(),
+              Number(v.valueQuantity.value),
+              v.valueQuantity.code
+            ];
+          }).value()
 
-        var dia = components.find(function(component){
-            return component.code.coding.find(function(coding) {
-                return coding.code === "8462-4";
-            });
-        });
-        var sys = components.find(function(component){
-            return component.code.coding.find(function(coding) {
-                return coding.code === "8480-6";
-            });
-        });
-
-        pt.sbp_arr.push([
-          new XDate(bp.effectiveDateTime).valueOf(),
-          Number(sys.valueQuantity.value),
-          sys.valueQuantity.code
-        ])
-
-        pt.dbp_arr.push([
-          new XDate(bp.effectiveDateTime).valueOf(),
-          Number(dia.valueQuantity.value),
-          dia.valueQuantity.code
-        ])
+      pt.dbp_arr = _(vitalsByCode["8462-4"]||[]).chain()
+          .map(function(v){
+            return [
+              new XDate(v.effectivePeriod.start).valueOf(),
+              Number(v.valueQuantity.value),
+              v.valueQuantity.code
+            ];
+          }).value()
 
         _(pt.sbp_arr).sortBy(function(bp){ return bp[0]; })
         _(pt.dbp_arr).sortBy(function(bp){ return bp[0]; })
@@ -270,8 +261,6 @@ var get_vital_sign_sets = function(){
             { yaxis: { from: 200, to: 130 }, color: "#eee" }
           ]}
         });
-
-      });
 
       pt.weight_arr = _(vitalsByCode["29463-7"]||[]).chain()
         .map(function(v){
