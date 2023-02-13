@@ -220,6 +220,27 @@ var get_demographics = function(){
   }).promise();
 };
 
+var get_immunizations = function(){
+  return $.Deferred(function(dfd){
+    pt.flu_shot_date_arr = [];
+    pt.pneumovax_date_arr = [];
+    smart.patient.api.fetchAll({type: "Immunization"}).then(function(immunization){
+      _(immunization).each(function(immunization){
+        if (immunization.vaccineCode.coding[0].code == "88") {
+          pt.flu_shot_date_arr.push(immunization.occurrenceDateTime);
+        } else if (immunization.vaccineCode.coding[0].code == "109") {
+          pt.pneumovax_date_arr.push(immunization.occurrenceDateTime);
+        }
+      });
+
+      pt.flu_shot_date = _(pt.flu_shot_date_arr).last() || null;
+      pt.pneumovax_date = _(pt.pneumovax_date_arr).last() || null;
+
+      dfd.resolve();
+    })
+  }).promise();
+};
+
 var get_vital_sign_sets = function(){
   return $.Deferred(function(dfd){
    
@@ -580,6 +601,7 @@ FHIR.oauth2.ready(function(smart){
   $.when(
      get_demographics()
    , get_vital_sign_sets()
+   , get_immunizations()
    , get_lab_results()
    , get_problems()
    , get_medications()
@@ -760,8 +782,16 @@ FHIR.oauth2.ready(function(smart){
     }
 
     // todo: NO pneumovax or flu codes in the current pts...
-    if (!pt.pneumovax_date) { $('#pneumovax_date').text('Unknown'); }
-    if (!pt.flu_shot_date) { $('#flu_shot_date').text('Unknown'); }
+    if (!pt.pneumovax_date) {
+      $('#pneumovax_date').text('Unknown');
+    } else {
+      $('#pneumovax_date').text(pt.pneumovax_date);
+    }
+    if (!pt.flu_shot_date) {
+      $('#flu_shot_date').text('Unknown');
+    } else {
+      $('#flu_shot_date').text(pt.flu_shot_date);
+    }
 
     //
     // Problems
