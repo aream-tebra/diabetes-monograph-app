@@ -1151,21 +1151,21 @@ FHIR.oauth2.ready(function(smart){
       var b = new XDate(pt.bday)
       var age = Math.round(b.diffYears(new XDate()));
 
-      if (age > 10) {
-        pt.dbp_arr = _(pt.dbp_arr).map(function(e){
-          e[1] = e[1] + 30;
-          return e;
-        })
-        pt.sbp_arr = _(pt.sbp_arr).map(function(e){
-          e[1] = e[1] + 30;
-          return e;
-        })
-
-        pt.sbp = _(pt.sbp_arr).last() || null;
-        pt.dbp = _(pt.dbp_arr).last() || null;
-        pt.sbp_next = _(pt.sbp_arr).last(2)[0] || null;
-        pt.dbp_next = _(pt.dbp_arr).last(2)[0] || null;
-      }
+      // if (age > 10) {
+      //   pt.dbp_arr = _(pt.dbp_arr).map(function(e){
+      //     e[1] = e[1] + 30;
+      //     return e;
+      //   })
+      //   pt.sbp_arr = _(pt.sbp_arr).map(function(e){
+      //     e[1] = e[1] + 30;
+      //     return e;
+      //   })
+      //
+      //   pt.sbp = _(pt.sbp_arr).last() || null;
+      //   pt.dbp = _(pt.dbp_arr).last() || null;
+      //   pt.sbp_next = _(pt.sbp_arr).last(2)[0] || null;
+      //   pt.dbp_next = _(pt.dbp_arr).last(2)[0] || null;
+      // }
 
       // plot'em!
       $.plot($("#bp_graph"),  [pt.dbp_arr, pt.sbp_arr], pt.bp_flot_opts);
