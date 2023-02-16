@@ -226,10 +226,12 @@ var get_immunizations = function(){
     pt.pneumovax_date_arr = [];
     smart.patient.api.fetchAll({type: "Immunization"}).then(function(immunization){
       _(immunization).each(function(immunization){
-        if (immunization.vaccineCode.coding[0].code == "88") {
-          pt.flu_shot_date_arr.push(immunization.occurrenceDateTime);
-        } else if (immunization.vaccineCode.coding[0].code == "109") {
-          pt.pneumovax_date_arr.push(immunization.occurrenceDateTime);
+        if (immunization.hasOwnProperty('vaccineCode') && immunization.vaccineCode.hasOwnProperty('coding')) {
+          if (immunization.vaccineCode.coding[0].code == "88") {
+            pt.flu_shot_date_arr.push(immunization.occurrenceDateTime);
+          } else if (immunization.vaccineCode.coding[0].code == "109") {
+            pt.pneumovax_date_arr.push(immunization.occurrenceDateTime);
+          }
         }
       });
 
